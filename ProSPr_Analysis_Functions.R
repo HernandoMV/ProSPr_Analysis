@@ -1,4 +1,4 @@
-#Analyze_tSNE_Functions.R
+#ProSPr_Analysis_Functions.R
 #This script contains functions for the tSNE analysis of ProSPr
 
 ########create shiny object#########
