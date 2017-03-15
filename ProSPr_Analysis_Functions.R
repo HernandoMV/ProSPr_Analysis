@@ -119,19 +119,44 @@ Create_Heatmap <- function(CellMat, CellsToLabel, Ptit){
 library(pheatmap)
 library(vegan)
 
-Create_Heatmap_Pretty <- function(CellMat, CellsToLabel, Ptit, NameToSave){
+#ColorVector <- c("red","blue","yellow","green","magenta")
+
+#data.frame(cutree(hv$tree_row, k=5))
+Create_Heatmap_Pretty <- function(CellMat, CellsToLabel, Ptit, NameToSave, RowClusters){
   submat <- CellMat[CellsToLabel,]
-  submat = submat[,colSums(submat)>0]  
+  submat = submat[,colSums(submat)>0]
+  CluRows = hclust(vegdist(submat, method="jaccard"), method = "complete")
+  if(RowClusters>1){
+    ColorVector <- rainbow(RowClusters)
+    #ColorVector <- c("red","yellow","green","blue","orange")
+    SubClust_DF <- data.frame(cutree(CluRows, k = RowClusters))
+    SubClust_DF[,1] <- unlist(lapply(SubClust_DF[,1], function(x) ColorVector[x]))
+    colnames(SubClust_DF) <- c("ColorID")
+    names(ColorVector) <- ColorVector
+    #anno_colors <- list(ID = c(red = "red", yellow="yellow", green="green",orange="orange",blue="blue"))
+    anno_colors <- list(ColorID = c(ColorVector))
+    
+  }else{
+    RowClusters = NA
+    SubClust_DF = NULL
+  }
   hv<-pheatmap(submat, cellwidth = 2, cellheight=2,
-               cluster_rows= hclust(vegdist(submat, method="jaccard"), method = "complete"),
+               cluster_rows= CluRows,
                cluster_cols= hclust(vegdist(t(submat), method="jaccard"), method = "complete"),
-               main = Ptit, fontsize =2.3, legend = T,
+               treeheight_col = 0, treeheight_row = 5,
+               main = Ptit, fontsize =2.3, legend = F,
+               cutree_rows = RowClusters,
+               annotation_row = SubClust_DF,
+               annotation_colors = anno_colors[1],
+               annotation_legend = F,
                filename = NameToSave
   #clustering_distance_rows="canberra", 
   #clustering_distance_cols="canberra")
   )
   dev.off()
-  #return(hv)
+  if(!is.na(RowClusters)){
+    return(SubClust_DF)
+  }
 }
 
 
@@ -142,7 +167,11 @@ library(rgl)
 #SVtoHighligth is a list of the SV that will be highlighted
 PlotSV3D <- function(Reference3D, Coordinates3D, SVtoHighligth){
   plot3d(Reference3D,size=6,col='grey92',alpha=0.05)#,box=NA)
-  spheres3d(Coordinates3D[rownames(Coordinates3D) %in% SVtoHighligth,],radius=2.18,col="red",alpha=0.6)
+  for (i in c(1:length(SVtoHighligth))){
+    col <- names(SVtoHighligth)[i]
+    SVs <- SVtoHighligth[[col]]
+    spheres3d(Coordinates3D[rownames(Coordinates3D) %in% SVs,],radius=2.18,col=col,alpha=0.6)
+  }
   aspect3d("iso")
   par3d("windowRect"= c(0,0,800,800))
   bg3d("black")
@@ -168,3 +197,28 @@ GenesToCells <- function(GeneNames, Exp_matrix){
 }
 
 
+###########Get a list of supervoxels in a group of cells#########
+#Returns a list of SV grouped by color
+getListOfSV <- function(cellnames,cellGroups,cellsSVs){
+  #group cells based on the number of clusters
+  if(!is.null(cellGroups)){
+    colors.names <- unique(cellGroups[,1])
+  }else{
+    colors.names <- c("red")
+  }
+  SVL <- vector("list", length(colors.names))
+  names(SVL) <- colors.names  
+
+  if(!is.null(cellGroups)){
+    for (CellName in cellnames){
+      col <- cellGroups[CellName,1]
+      SVL[[col]] = append(SVL[[col]],strsplit(as.character(cellsSVs[cellsSVs$clustersID==CellName,]$supervoxelsID),",")[[1]])
+    }
+  }else{
+    for (CellName in cellnames){
+      col <- "red"
+      SVL[[col]] = append(SVL[[col]],strsplit(as.character(cellsSVs[cellsSVs$clustersID==CellName,]$supervoxelsID),",")[[1]])
+    }
+  }
+  return (SVL)
+}
