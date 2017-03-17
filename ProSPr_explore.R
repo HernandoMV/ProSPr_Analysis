@@ -49,16 +49,17 @@ source("~/Desktop/EMBL/Images/PrImR6/5PrImR6_Atlas/Scripts/ProSPr_Analysis/ProSP
 ##################################RUN APPLICATION########################################################
 #generate a random string to save in a unique folder
 ClusterName <- MHmakeRandomString()
+ClusterName <- MHmakeRandomString()
+print(ClusterName)
 #run shiny:
 shinyApp(ui = ui, server = server)
 
 ##################################PASTE SELECTION########################################################
 #paste selection:
 mySelection <- 
-  "1366,1367,1379,1380,1381,1444,1445,1446,1447,1448,1450,1486,1487,1506,1523,1533,1535,1536,1537,1538,1539,1540,1545,1546,1547,1600,1601,1606,1607,1608,1609,1667,1691,1694,1695,1697,1698,1699,1701,1702,1703,1741,1792,1793,1837,1856,1862,1863,1864,1865,1867,1868,1869,1870,1871,1875,1876,1877,1878,1879,1880,1946,1947,1948,1951,1966,1996,1997,2011,2012,2013,2014,2019,2020,2021,2022,2024,2028,2030,2032,2033,2066,2072,2096,2097,2106,2109,2110,2112,2120,2121,2124,2125,2127,2163,2164,2165,2166,2172,2173,2174,2175,2186,2188,2190,2191,2194,2195,2197,2217,2219,2223,2248,2249,2250,2251,2252,2261,2262,2263,2267,2268"
-
+  "534,645,653,654,724,911,2270,2278,2285,2286,2299,2404,2677,2805,2806,2807,2891,2894,2950,3105,3106,3180,3182,3205,3206,3207,3218,3269,725,726,913,914,926,927,937,966,985,992,1012,1082,2287,2303,2304,2418,2575,2952,3105,3106,3182,3205,3206"
 #Define the number of clusters you want to have automatically in the heatmap and the 3D visualization (use 0 for default)
-NumberOfClusters = 4
+NumberOfClusters = 6
 
 dir.create(ClusterName)
 
@@ -188,11 +189,11 @@ ClusterName <- tail(unlist(strsplit(dirname(filepath), .Platform$file.sep)),1)
 filedata <- read.table(filepath)
 cells2plot <- as.vector(filedata$V1)
 
-#Get the SuperVoxels in these cells
-SuperVoxel_List <- NULL
-for (CellName in cells2plot){
-  SuperVoxel_List = append(SuperVoxel_List,strsplit(as.character(Clust_DF[Clust_DF$clustersID==CellName,]$supervoxelsID),",")[[1]])
-}
+# #Get the SuperVoxels in these cells
+# SuperVoxel_List <- NULL
+# for (CellName in cells2plot){
+#   SuperVoxel_List = append(SuperVoxel_List,strsplit(as.character(Clust_DF[Clust_DF$clustersID==CellName,]$supervoxelsID),",")[[1]])
+# }
 
 #label t-sne plot:
 p <- LabelCellsInTsne(Clust_Prof,tsne_DF,cells2plot,ClusterName)

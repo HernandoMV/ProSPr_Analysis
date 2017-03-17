@@ -61,7 +61,7 @@ LabelCellsInTsne <- function(CellMat, tSNEdf, CellsToLabel, Ptit){
   p <- ggplot(tSNEdf, aes(x = V1, y = V2, color = colsforSC)) +
     scale_colour_manual(values = c("grey","red")) +
     geom_point(size = 3, alpha = 0.9) + 
-    ggtitle(ClusterName) +
+    ggtitle(Ptit) +
     theme(axis.title=element_text(size=14)) +
     theme(plot.title = element_text(size=18,vjust=1.1, face="bold")) +
     theme(axis.title=element_text(size=14)) +
